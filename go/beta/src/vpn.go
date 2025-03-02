@@ -8,6 +8,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -15,6 +16,14 @@ import (
 type PIDInfo struct {
 	PID       int       `json:"pid"`
 	StartTime time.Time `json:"start_time"`
+}
+
+func checkSudo() error {
+	cmd := exec.Command("sudo", "-v")
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
 
 func ensureConfigDir(configPath string) error {
@@ -41,7 +50,55 @@ func savePID(pid int, configPath string) error {
 	return nil
 }
 
-func main() {
+func checkExistingVPN(configPath string) (bool, error) {
+	pidFile := filepath.Join(configPath, "pid.json")
+
+	// Check if PID file exists
+	if _, err := os.Stat(pidFile); os.IsNotExist(err) {
+		return false, nil
+	}
+
+	// Read the PID file
+	data, err := os.ReadFile(pidFile)
+	if err != nil {
+		return false, fmt.Errorf("error reading PID file: %v", err)
+	}
+
+	var pidInfo PIDInfo
+	if err := json.Unmarshal(data, &pidInfo); err != nil {
+		// If PID file is corrupted, remove it
+		os.Remove(pidFile)
+		return false, nil
+	}
+
+	// Check if the process exists
+	process, err := os.FindProcess(pidInfo.PID)
+	if err != nil {
+		// Process not found, clean up PID file
+		os.Remove(pidFile)
+		return false, nil
+	}
+
+	// Check if process is still running
+	if err := process.Signal(syscall.Signal(0)); err != nil {
+		// Process is not running, clean up PID file
+		os.Remove(pidFile)
+		return false, nil
+	}
+
+	// Process exists and is running
+	return true, nil
+}
+
+func main_vpn() {
+	// Check sudo permissions first
+	fmt.Println("Checking sudo permissions...")
+	if err := checkSudo(); err != nil {
+		fmt.Println("Error: This program requires sudo privileges")
+		fmt.Println("Please run with sudo or enter your password when prompted")
+		os.Exit(1)
+	}
+
 	// Get current username
 	currentUser, err := user.Current()
 	if err != nil {
@@ -57,6 +114,18 @@ func main() {
 	// Ensure config directory exists
 	if err := ensureConfigDir(configPath); err != nil {
 		fmt.Println("Error creating config directory:", err)
+		os.Exit(1)
+	}
+
+	// Check for existing VPN process
+	isRunning, err := checkExistingVPN(configPath)
+	if err != nil {
+		fmt.Printf("Error checking existing VPN process: %v\n", err)
+		os.Exit(1)
+	}
+	if isRunning {
+		fmt.Println("VPN is already running")
+		fmt.Println("Use './main stop' to stop the existing VPN before starting a new one")
 		os.Exit(1)
 	}
 
@@ -95,7 +164,6 @@ func main() {
 		}
 
 		// Process runs in background, we don't wait for it
-		// But we can optionally report its status if needed
 		go func() {
 			err := sudoCmd.Wait()
 			if err != nil {
