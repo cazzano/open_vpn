@@ -139,7 +139,7 @@ func main_vpn() {
 
 		// Build the OpenVPN command
 		sudoCmd := exec.Command("sudo", append([]string{"/usr/sbin/openvpn"},
-			"--config", "/home/"+username+"/open_vpn/config.ovpn",
+			"--config", "/home/"+username+"/.open_vpn/config.ovpn",
 			"--auth-user-pass", "/etc/openvpn/auth.txt")...)
 
 		// Redirect stdout and stderr to the background

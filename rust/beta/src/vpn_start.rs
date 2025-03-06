@@ -104,7 +104,7 @@ fn check_existing_vpn(config_path: &Path) -> Result<bool, String> {
 }
 
 fn start_openvpn(username: &str, config_path: &Path) -> Result<Child, String> {
-    let config_file = format!("/home/{}/open_vpn/config.ovpn", username);
+    let config_file = format!("/home/{}/.open_vpn/config.ovpn", username);
     let auth_file = "/etc/openvpn/auth.txt";
 
     // Build the OpenVPN command
