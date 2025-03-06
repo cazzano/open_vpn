@@ -1,52 +1,36 @@
 use std::env;
-use std::process::{Command, Stdio};
-use std::thread;
-use std::time::Duration;
+use std::process::exit;
+
+// Import the two modules
+mod vpn_kill;
+mod vpn_start;
+
+fn print_usage() {
+    println!("Usage: ./vpn <command>");
+    println!("Commands:");
+    println!("  start    Start the VPN connection");
+    println!("  stop     Stop the VPN connection");
+    println!("  help     Show this help message");
+}
 
 fn main() {
-    // Get current username
-    let username = match env::var("USER") {
-        Ok(user) => user,
-        Err(_) => {
-            eprintln!("Error getting current user");
-            return;
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() < 2 {
+        print_usage();
+        exit(1);
+    }
+
+    let command = &args[1];
+
+    match command.as_str() {
+        "start" => vpn_start::main_vpn(), // Updated function name based on your original code
+        "stop" => vpn_kill::kill_vpn(),
+        "help" => print_usage(),
+        _ => {
+            println!("Unknown command: {}", command);
+            print_usage();
+            exit(1);
         }
-    };
-    
-    println!("Starting OpenVPN as root in the background...");
-    
-    // Spawn a new thread to run OpenVPN in the background
-    thread::spawn(move || {
-        // Build the OpenVPN command with sudo
-        let sudo_process = Command::new("sudo")
-            .arg("/usr/sbin/openvpn")
-            .arg("--config")
-            .arg(format!("/home/{}/open_vpn/config.ovpn", username))
-            .arg("--auth-user-pass")
-            .arg("/etc/openvpn/auth.txt")
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .spawn();
-            
-        match sudo_process {
-            Ok(child) => {
-                println!("OpenVPN started with PID: {}", child.id());
-                
-                // We deliberately don't wait for the child process
-                // This allows it to continue running in the background
-            },
-            Err(e) => {
-                eprintln!("Error starting OpenVPN command: {}", e);
-            }
-        }
-    });
-    
-    // Give the thread a moment to start the process
-    thread::sleep(Duration::from_secs(1));
-    
-    println!("OpenVPN launcher has started the process, continuing execution...");
-    
-    // The main program will exit here, but OpenVPN will continue running in the background
-    // If you want the program to stay running, uncomment the line below:
-    // std::thread::park(); // This will block the main thread indefinitely
+    }
 }
