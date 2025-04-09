@@ -8,6 +8,7 @@ import (
 func printUsage() {
 	fmt.Println("Usage: ./main <command>")
 	fmt.Println("Commands:")
+	fmt.Println("  init     Initialize VPN configuration")
 	fmt.Println("  start    Start the VPN connection")
 	fmt.Println("  stop     Stop the VPN connection")
 	fmt.Println("  help     Show this help message")
@@ -22,6 +23,8 @@ func main() {
 	command := os.Args[1]
 
 	switch command {
+	case "init":
+		initVPN()
 	case "start":
 		main_vpn()
 	case "stop":
