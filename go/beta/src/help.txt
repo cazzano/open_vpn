@@ -1,0 +1,4 @@
+Example:
+      1.svpn init, it will intialize the vpn configs
+      2.svpn start, it will starts the vpn in background
+      3.svpn stop, it will stops the vpn in background

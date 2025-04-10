@@ -125,7 +125,7 @@ func main_vpn() {
 	}
 	if isRunning {
 		fmt.Println("VPN is already running")
-		fmt.Println("Use './main stop' to stop the existing VPN before starting a new one")
+		fmt.Println("Use 'svpn stop' to stop the existing VPN before starting a new one")
 		os.Exit(1)
 	}
 

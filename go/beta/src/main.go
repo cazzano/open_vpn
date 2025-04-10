@@ -5,18 +5,9 @@ import (
 	"os"
 )
 
-func printUsage() {
-	fmt.Println("Usage: ./main <command>")
-	fmt.Println("Commands:")
-	fmt.Println("  init     Initialize VPN configuration")
-	fmt.Println("  start    Start the VPN connection")
-	fmt.Println("  stop     Stop the VPN connection")
-	fmt.Println("  help     Show this help message")
-}
-
 func main() {
 	if len(os.Args) < 2 {
-		printUsage()
+		PrintUsage()
 		os.Exit(1)
 	}
 
@@ -29,11 +20,13 @@ func main() {
 		main_vpn()
 	case "stop":
 		killVPN()
-	case "help":
-		printUsage()
+	case "--h":
+		PrintUsage()
+	case "--v":
+		DisplayVersion()
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
-		printUsage()
+		PrintUsage()
 		os.Exit(1)
 	}
 }
