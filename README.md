@@ -9,7 +9,7 @@
 - **Simple Management** - Start and stop your VPN connection effortlessly
 - **Streamlined Interface** - Minimal commands for maximum productivity
 
-## 📦 Installation
+## 📦Build && Installation From Source
 ```bash
 # Clone the repository
 git clone https://github.com/cazzano/open_vpn.git
@@ -20,6 +20,14 @@ cd open_vpn/go/beta/src
 # Install the tool
 go build && mv src svpn && sudo mv svpn /usr/bin && echo "SVPN successfully installed!"
 ```
+## Installation From Release
+
+```bash
+curl -L -o svpn_vr-1.0_x86_64_arch.zip https://github.com/cazzano/open_vpn/releases/download/vpn/svpn_vr-1.0_x86_64_arch.zip
+
+unzip svpn_vr-1.0_x86_64_arch.zip && sudo mv svpn /usr/bin/ && rm svpn_vr-1.0_x86_64_arch.zip
+```
+
 
 ## 🚀 Usage
 SVPN provides straightforward commands to manage your VPN connections:
